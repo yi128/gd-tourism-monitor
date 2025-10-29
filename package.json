@@ -1,0 +1,40 @@
+{
+  "name": "sd",
+  "private": true,
+  "version": "0.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "@eslint/js": "^9.29.0",
+    "@types/node": "^24.0.7",
+    "autofit.js": "^3.2.8",
+    "echarts": "^5.6.0",
+    "element-plus": "^2.11.5",
+    "eslint": "^9.29.0",
+    "eslint-plugin-prettier": "^5.5.0",
+    "eslint-plugin-vue": "^10.2.0",
+    "globals": "^16.2.0",
+    "odometer": "^0.4.8",
+    "prettier": "^3.5.3",
+    "sass": "^1.89.2",
+    "typescript-eslint": "^8.34.1",
+    "vue": "^3.5.13",
+    "vue-eslint-parser": "^10.1.3",
+    "vue3-odometer": "^0.1.3",
+    "vue3-scroll-seamless": "^1.0.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "typescript": "~5.7.2",
+    "unplugin-auto-import": "^20.2.0",
+    "unplugin-vue-components": "^29.1.0",
+    "vite": "^6.1.0",
+    "vue-tsc": "^2.2.0"
+  }
+}

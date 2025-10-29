@@ -1,5 +1,5 @@
 import * as echarts from 'echarts'
-import type { EChartsOption, XAXisOption, YAXisOption, TooltipComponentOption, SeriesOption } from 'echarts'
+import type { EChartsOption, XAXisComponentOption, YAXisComponentOption, TooltipComponentOption, SeriesOption } from 'echarts'
 
 export const useChartConfig = () => {
     // 创建基础柱状图配置
@@ -39,7 +39,7 @@ export const useChartConfig = () => {
                     fontSize: 16,
                     color: '#2c3e50'
                 }
-            } as XAXisOption,
+            } as XAXisComponentOption,
             yAxis: {
                 type: 'value',
                 axisLine: {
@@ -63,7 +63,7 @@ export const useChartConfig = () => {
                     fontSize: 16,
                     color: '#2c3e50'
                 }
-            } as YAXisOption,
+            } as YAXisComponentOption,
             series: seriesData
         }
 
@@ -231,8 +231,6 @@ export const use3DChartConfig = () => {
     }
 
     const get3DCubeSeriesConfig = (values: number[]) => {
-        const { CubeLeft, CubeRight, CubeTop } = create3DCubeShapes()
-
         return [
             {
                 type: 'custom',

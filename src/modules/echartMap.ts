@@ -1,6 +1,5 @@
 import * as echarts from 'echarts'
 import sdData from '@/assets/data/guangdong-geo'
-import mapBg from '@/assets/images/mapBg.png'
 import lineTop1 from '@/assets/images/lineTop1.png'
 import lineTop2 from '@/assets/images/lineTop2.png'
 import lineTop3 from '@/assets/images/lineTop3.png'
@@ -104,9 +103,6 @@ export const getMapOption = () => {
         },
         itemStyle: {
           normal: {
-            areaColor: {
-              image: mapBg
-            },
             borderColor: '#8aa5db',
             borderWidth: 1
           }

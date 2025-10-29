@@ -1,5 +1,5 @@
 {
-  "name": "sd",
+  "name": "gd",
   "private": true,
   "version": "0.0.0",
   "type": "commonjs",
@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "autofit.js": "^3.2.8",
+    "echarts": "^6.0.0",
+    "element-plus": "^2.11.5",
     "globals": "^16.2.0",
     "odometer": "^0.4.8",
     "prettier": "^3.5.3",

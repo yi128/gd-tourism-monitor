@@ -47,7 +47,7 @@ onMounted(() => {
     }
   } else {
     echartsInstance = echarts.init(echartsRef.value as HTMLDivElement)
-    echartsInstance.on('click', function (val) {
+    echartsInstance.on('click', function (val:any) {
       Eaclick(val)
     })
     if (state.option) {

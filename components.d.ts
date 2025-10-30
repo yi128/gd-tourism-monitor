@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AgeDistribution: typeof import('./src/components/leftPanel/ageDistribution.vue')['default']
     CEcharts: typeof import('./src/components/common/CEcharts.vue')['default']
     CFooter: typeof import('./src/components/CFooter.vue')['default']
     CHeader: typeof import('./src/components/CHeader.vue')['default']
@@ -15,11 +16,13 @@ declare module 'vue' {
     CMap: typeof import('./src/components/CMap.vue')['default']
     CPanel: typeof import('./src/components/common/CPanel.vue')['default']
     ElIcon: typeof import('element-plus/es')['ElIcon']
+    IndustryRevenue: typeof import('./src/components/rightPanel/industryRevenue.vue')['default']
     LeftPanel: typeof import('./src/components/leftPanel.vue')['default']
     RankingOfScenicSpots: typeof import('./src/components/leftPanel/rankingOfScenicSpots.vue')['default']
     RealTimeHotWords: typeof import('./src/components/rightPanel/realTimeHotWords.vue')['default']
     ReceptionOfTourists: typeof import('./src/components/leftPanel/receptionOfTourists.vue')['default']
     RightPanel: typeof import('./src/components/rightPanel.vue')['default']
+    Top5Tourists: typeof import('./src/components/rightPanel/top5Tourists.vue')['default']
     TourismSpendTop5: typeof import('./src/components/rightPanel/tourismSpendTop5.vue')['default']
     VisitorSourceTop5: typeof import('./src/components/leftPanel/visitorSourceTop5.vue')['default']
   }

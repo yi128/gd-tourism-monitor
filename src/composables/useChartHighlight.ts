@@ -3,40 +3,74 @@ import { onUnmounted } from "vue"
 export default function useChartHighlight() {
     let highlightTimer: any = null
     let currentIndex = 0
+    let isPaused = false
+    let resumeTimer: any = null
 
     const startHighlightLoop = (chart: any, dataLength: number) => {
-        if (!chart) {
-            console.warn('Chart instance is not available')
-            return
-        }
+        if (!chart) return
 
-        // 先停止现有的定时器
         stopHighlightLoop()
+        isPaused = false
 
-        // 确保图表已经渲染
         setTimeout(() => {
             if (!chart) return
 
             highlightTimer = setInterval(() => {
+                if (isPaused) return
+
                 try {
-                    // 取消之前的高亮
-                    chart.dispatchAction({
-                        type: 'downplay'
-                    })
-                    // 高亮当前柱子
+                    chart.dispatchAction({ type: 'downplay' })
                     chart.dispatchAction({
                         type: 'highlight',
                         seriesIndex: 0,
                         dataIndex: currentIndex
                     })
-                    // 更新索引，循环
                     currentIndex = (currentIndex + 1) % dataLength
                 } catch (error) {
-                    console.error('Highlight error:', error)
                     stopHighlightLoop()
                 }
             }, 1500)
-        }, 500) // 延迟启动，确保图表就绪
+        }, 500)
+    }
+
+    // 暂停并高亮当前柱子
+    const pauseAndHighlight = (chart: any, index: number) => {
+        // 清除之前的恢复定时器
+        if (resumeTimer) {
+            clearTimeout(resumeTimer)
+            resumeTimer = null
+        }
+
+        isPaused = true
+
+        try {
+            // 取消所有高亮
+            chart.dispatchAction({ type: 'downplay' })
+            // 高亮悬停的柱子
+            chart.dispatchAction({
+                type: 'highlight',
+                seriesIndex: 0,
+                dataIndex: index
+            })
+            // 更新当前索引
+            currentIndex = index
+        } catch (error) {
+            console.error('暂停高亮错误:', error)
+        }
+    }
+
+    // 延迟恢复循环
+    const delayedResume = () => {
+        // 清除之前的恢复定时器
+        if (resumeTimer) {
+            clearTimeout(resumeTimer)
+            resumeTimer = null
+        }
+
+        // 0.5秒后恢复
+        resumeTimer = setTimeout(() => {
+            isPaused = false
+        }, 500)
     }
 
     const stopHighlightLoop = () => {
@@ -44,6 +78,11 @@ export default function useChartHighlight() {
             clearInterval(highlightTimer)
             highlightTimer = null
         }
+        if (resumeTimer) {
+            clearTimeout(resumeTimer)
+            resumeTimer = null
+        }
+        isPaused = false
     }
 
     onUnmounted(() => {
@@ -52,6 +91,8 @@ export default function useChartHighlight() {
 
     return {
         startHighlightLoop,
-        stopHighlightLoop
+        stopHighlightLoop,
+        pauseAndHighlight,
+        delayedResume
     }
 }

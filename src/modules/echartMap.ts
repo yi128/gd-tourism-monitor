@@ -1,11 +1,12 @@
 import * as echarts from 'echarts'
-import sdData from '@/assets/data/guangdong-geo'
+import gdData from '@/assets/data/guangdong-geo'
 import lineTop1 from '@/assets/images/lineTop1.png'
 import lineTop2 from '@/assets/images/lineTop2.png'
 import lineTop3 from '@/assets/images/lineTop3.png'
 import lineTop4 from '@/assets/images/lineTop4.png'
 import lineTop5 from '@/assets/images/lineTop5.png'
-echarts.registerMap('sd', sdData as any)
+import mapBg from '@/assets/images/mapBg.png'
+echarts.registerMap('gd', gdData as any)
 const lineTopList: any = [lineTop1, lineTop2, lineTop3, lineTop4, lineTop5]
 // 获取地图配置
 export const getMapOption = () => {
@@ -28,7 +29,7 @@ export const getMapOption = () => {
   const geoList: any = []
   for (let i = 1; i <= colorList.length; i++) {
     const mapOption: any = {
-      map: 'sd',
+      map: 'gd',
       aspectScale: 0.85,
       emphasis: {
         disabled: true
@@ -55,7 +56,7 @@ export const getMapOption = () => {
     geo: [
       // 最外围发光边界
       {
-        map: 'sd',
+        map: 'gd',
         aspectScale: 0.85,
         layoutCenter: ['50%', '55%'], //地图位置
         layoutSize: '90%',
@@ -74,7 +75,7 @@ export const getMapOption = () => {
       },
       // 最外层遮罩蒙版
       {
-        map: 'sd',
+        map: 'gd',
         aspectScale: 0.85,
         layoutCenter: ['50%', '55%'], //地图位置
         layoutSize: '90%',
@@ -87,13 +88,13 @@ export const getMapOption = () => {
         },
         label: {
           show: true,
-          color: '#fff',
-          fontSize: 14
+          color: '#ffffffff',
+          fontSize: 16
         }
       },
       // 内部蓝色边界
       {
-        map: 'sd',
+        map: 'gd',
         aspectScale: 0.85,
         layoutCenter: ['50%', '55%'], //地图位置
         layoutSize: '90%',
@@ -103,6 +104,9 @@ export const getMapOption = () => {
         },
         itemStyle: {
           normal: {
+            areaColor: {
+              image: mapBg,
+            },
             borderColor: '#8aa5db',
             borderWidth: 1
           }
@@ -304,8 +308,8 @@ const getLineData = () => {
           rich: {
             cityName: {
               color: 'rgba(201, 211, 234, 1)',
-              fontSize: 12, // 减小字体
-              padding: [4, 0, 2, 40] // 调整padding
+              fontSize: 12,
+              padding: [4, 0, 2, 40]
             },
             value: {
               color: 'rgba(255, 187, 94, 1)',

@@ -20,10 +20,12 @@ const option = ref<EChartsOption>({})
 const chartRef = ref()
 const values: number[] = [18, 16, 12, 9, 8]
 
-
 const { createBaseBarConfig } = useChartConfig()
-const { get3DCubeSeriesConfig } = use3DChartConfig()
-const { startHighlightLoop } = useChartHighlight()
+const { create3DCubeShapes, get3DCubeSeriesConfig } = use3DChartConfig()
+const { startHighlightLoop, pauseAndHighlight, delayedResume } = useChartHighlight()  // 添加新方法
+
+// 注册3D形状
+create3DCubeShapes()
 
 const createEchartBar = (): EChartsOption => {
   const xAxisData = ['湖南', '广西', '江西', '福建', '湖北']
@@ -45,6 +47,19 @@ const createEchartBar = (): EChartsOption => {
 
 // 图表加载完成回调
 const handleChartLoad = (chart: any) => {
+  // 鼠标悬停事件
+  chart.on('mouseover', (params: any) => {
+    if (params.dataIndex !== undefined) {
+      pauseAndHighlight(chart, params.dataIndex)  // 立即暂停并高亮悬停柱子
+    }
+  })
+  
+  // 鼠标移出事件
+  chart.on('mouseout', () => {
+    delayedResume()  // 1秒后恢复循环
+  })
+  
+  // 启动高亮循环
   startHighlightLoop(chart, values.length)
 }
 

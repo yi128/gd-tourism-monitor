@@ -17,8 +17,10 @@
 ## 📦 项目来源
 
 <div align="center" style="margin-bottom: 8px;">
-  <img src="https://img.shields.io/badge/灵感来源-PDD-blueviolet?style=flat-square" alt="UI来源PDD" />
+  <img src="https://img.shields.io/badge/用途-学习参考-orange?style=flat-square" alt="项目用途" />
+  <img src="https://img.shields.io/badge/领域-数据可视化-yellow?style=flat-square" alt="技术领域" />
 </div>
+
 
 > 本项目为数据可视化大屏的学习演示项目，采用现代化的前端技术栈。主要展示 ECharts 在复杂数据可视化场景中的应用，包括地图可视化、动态图表、实时数据更新等特性。项目代码结构清晰，注释完整，旨在为开发者提供数据大屏开发的技术参考和实践案例。
 

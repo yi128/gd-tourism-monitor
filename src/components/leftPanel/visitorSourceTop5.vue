@@ -52,6 +52,7 @@ const option = computed<EChartsOption>(() => {
 })
 
 const handleChartLoad = (chart: any) => {
+  console.log('✅ chart onload 触发', chart?.id, '数据长度:', currentValues.value.length)
   chart.on('mouseover', (params: any) => {
     if (params.dataIndex !== undefined) {
       pauseAndHighlight(chart, params.dataIndex)

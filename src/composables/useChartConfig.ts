@@ -36,7 +36,7 @@ export const useChartConfig = () => {
                     show: false
                 },
                 axisLabel: {
-                    fontSize: 16,
+                    fontSize: 18,
                     color: '#2c3e50'
                 }
             },
@@ -47,7 +47,7 @@ export const useChartConfig = () => {
                 },
                 nameTextStyle: {
                     color: '#2c3e50',
-                    fontSize: 16,
+                    fontSize: 18,
                     padding: [0, 32, 12, 0]
                 },
                 splitLine: {
@@ -60,7 +60,7 @@ export const useChartConfig = () => {
                     show: false
                 },
                 axisLabel: {
-                    fontSize: 16,
+                    fontSize: 18,
                     color: '#2c3e50'
                 }
             },
@@ -95,7 +95,7 @@ export const useChartConfig = () => {
             label: {
                 show: options.showLabel !== false,
                 position: 'top',
-                fontSize: 14,
+                fontSize: 16,
                 color: '#2c3e50',
                 formatter: options.labelFormatter || '{c}'
             },
@@ -128,7 +128,7 @@ export const useChartConfig = () => {
             label: {
                 show: true,
                 position: 'top',
-                fontSize: 14,
+                fontSize: 16,
                 color: '#2c3e50',
                 offset: [0, -10],
                 formatter: '{c}%'

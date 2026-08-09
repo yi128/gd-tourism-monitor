@@ -28,7 +28,13 @@ const option = computed(() => {
   const revenueData = cityRevenueRank.value
   const xAxisData = revenueData?.cities || []
   const dataValues = revenueData?.revenues || []
-
+  const maxRevenue = computed(() => {
+    const max = Math.max(...dataValues)
+    if (max > 2500) {
+      return Math.ceil(max / 500) * 500
+    }
+    return 2500
+  })
   const series = [createBarSeries(dataValues, {
     barWidth: '25%',
     labelFormatter: '{c}'
@@ -38,7 +44,7 @@ const option = computed(() => {
     yAxis: {
       name: revenueData?.unit || '亿',
       min: 0,
-      max: 2500,
+      max: maxRevenue.value,
       interval: 500
     }
   })

@@ -3,53 +3,57 @@
   <CPanel class="age-distribution">
     <template #header>游客年龄分布</template>
     <template #content>
-      <CEcharts ref="chartRef" :option="option" @onload="startHighlightLoop" />
+      <CEcharts ref="chartRef" :option="option" @onload="handleChartLoad" />
     </template>
   </CPanel>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
 import CPanel from '@/components/common/CPanel.vue'
 import CEcharts from '@/components/common/CEcharts.vue'
+import { useTourismStore } from '@/stores/tourism'
+import { storeToRefs } from 'pinia'
 import type { EChartsOption, TooltipComponentOption, CustomSeriesOption, BarSeriesOption } from 'echarts'
 
-const option = ref<EChartsOption>({})
+const store = useTourismStore()
+const { ageDistribution } = storeToRefs(store)
+
 const chartRef = ref()
 let highlightTimer: any = null
 let currentIndex = 0
-const values: number[] = [2000, 1430, 800, 410, 120]
-// 高亮循环方法
-const startHighlightLoop = (chart: any) => {
+let cachedValues: number[] = []
+
+const startHighlightLoop = (chart: any, values: number[]) => {
   if (!chart) return
 
-  // 如果已经存在定时器，先清除
   if (highlightTimer) {
     clearInterval(highlightTimer)
     highlightTimer = null
   }
 
+  if (!values.length) return
+
   highlightTimer = setInterval(() => {
-    // 取消之前的高亮
     chart.dispatchAction({
       type: 'downplay'
     })
-    // 高亮当前柱子
     chart.dispatchAction({
       type: 'highlight',
       seriesIndex: 0,
       dataIndex: currentIndex
     })
-    // 更新索引，循环
     currentIndex = (currentIndex + 1) % values.length
   }, 1500)
 }
 
-const createEchartBar = (): EChartsOption => {
+const createEchartBar = (ageData: any): EChartsOption => {
   const offsetX = 10
   const offsetY = 5
-  // 创建左侧面
+  const values: number[] = ageData?.values || []
+  cachedValues = values
+
   const CubeLeft = echarts.graphic.extendShape({
     shape: {
       x: 0,
@@ -68,7 +72,6 @@ const createEchartBar = (): EChartsOption => {
       ctx.closePath()
     }
   })
-  // 绘制右侧面
   const CubeRight = echarts.graphic.extendShape({
     shape: {
       x: 0,
@@ -87,7 +90,6 @@ const createEchartBar = (): EChartsOption => {
       ctx.closePath()
     }
   })
-  // 绘制顶面
   const CubeTop = echarts.graphic.extendShape({
     shape: {
       x: 0,
@@ -95,7 +97,7 @@ const createEchartBar = (): EChartsOption => {
     },
     buildPath: function (ctx: any, shape: any) {
       const c1 = [shape.x, shape.y]
-      const c2 = [shape.x + offsetX, shape.y - offsetY] //右点
+      const c2 = [shape.x + offsetX, shape.y - offsetY]
       const c3 = [shape.x, shape.y - offsetX]
       const c4 = [shape.x - offsetX, shape.y - offsetY]
       ctx.moveTo(c1[0], c1[1])
@@ -105,7 +107,6 @@ const createEchartBar = (): EChartsOption => {
       ctx.closePath()
     }
   })
-  // 注册三个面图形
   echarts.graphic.registerShape('CubeLeft', CubeLeft)
   echarts.graphic.registerShape('CubeRight', CubeRight)
   echarts.graphic.registerShape('CubeTop', CubeTop)
@@ -130,7 +131,7 @@ const createEchartBar = (): EChartsOption => {
     },
     xAxis: {
       type: 'category',
-      data: ['20以下', '20-30', '30-40', '40-50', '50以上'],
+      data: ageData?.categories || [],
       axisLine: {
         show: true,
         lineStyle: {
@@ -202,7 +203,6 @@ const createEchartBar = (): EChartsOption => {
                     }
                   ])
                 },
-                // hover样式
                 emphasis: {
                   style: {
                     fill: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -317,9 +317,15 @@ const createEchartBar = (): EChartsOption => {
     ]
   }
 }
-onMounted(() => {
-  option.value = createEchartBar()
+
+const option = computed(() => {
+  return createEchartBar(ageDistribution.value)
 })
+
+const handleChartLoad = (chart: any) => {
+  startHighlightLoop(chart, cachedValues)
+}
+
 onUnmounted(() => {
   if (highlightTimer) {
     clearInterval(highlightTimer)

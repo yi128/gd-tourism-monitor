@@ -11,16 +11,13 @@
         }"
       >
         <div class="list-warpper">
-          <article class="list__item" v-for="(item, index) in list" :key="useId">
+          <article class="list__item" v-for="(item, index) in list" :key="index">
             <section class="item__index">{{ 'NO.' + (index + 1) }}</section>
             <section class="item__label">{{ item.label }}</section>
-            <!-- 进度条 -->
             <div class="progress">
               <span
                 class="progress__conent"
-                :style="{
-                  left: getProgressValue(item.value)
-                }"
+                :style="{ width: getProgressWidth(item.value) }"
               ></span>
             </div>
           </article>
@@ -33,17 +30,27 @@
 <script setup lang="ts">
 import { vue3ScrollSeamless } from 'vue3-scroll-seamless'
 import CPanel from '@/components/common/CPanel.vue'
-import { onMounted, ref, useId } from 'vue'
-import { rankingOfScenicSpots } from '@/assets/data/人流排名'
-const list = ref<{ label: string; value: number }[]>([])
-let maxValue = 0
-const getProgressValue = (value: number) => {
-  return -((maxValue - value) / maxValue) * 100 + '%'
-}
-onMounted(() => {
-  list.value = rankingOfScenicSpots.sort((a, b) => b.value - a.value)
-  maxValue = rankingOfScenicSpots.reduce((acc, item) => acc + item.value, 0)
+import { computed, useId } from 'vue'
+import { useTourismStore } from '@/stores/tourism'
+import { storeToRefs } from 'pinia'
+
+const store = useTourismStore()
+const { scenicSpotRanking } = storeToRefs(store)
+
+const list = computed(() => {
+  const scenicData = scenicSpotRanking.value || []
+  return [...scenicData].sort((a, b) => b.value - a.value)
 })
+
+const maxValue = computed(() => {
+  if (list.value.length === 0) return 1
+  return Math.max(...list.value.map(item => item.value))
+})
+
+const getProgressWidth = (value: number) => {
+  if (maxValue.value === 0) return '0%'
+  return (value / maxValue.value) * 100 + '%'
+}
 </script>
 <style lang="scss" scoped>
 .list {
@@ -83,9 +90,9 @@ onMounted(() => {
       overflow: hidden;
       .progress__conent {
         position: absolute;
-        left: -100%;
+        left: 0%;
         height: 100%;
-        width: 100%;
+        width: 0;
         background: linear-gradient(90deg, #ffa832, #f8c47d);
       }
     }

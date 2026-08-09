@@ -9,27 +9,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import CPanel from '@/components/common/CPanel.vue'
 import CEcharts from '@/components/common/CEcharts.vue'
 import type { EChartsOption } from 'echarts'
 import { useChartConfig, use3DChartConfig } from '@/composables/useChartConfig'
 import useChartHighlight from '@/composables/useChartHighlight'
+import { useTourismStore } from '@/stores/tourism'
+import { storeToRefs } from 'pinia'
 
-const option = ref<EChartsOption>({})
+const store = useTourismStore()
+const { visitorSourceTop5 } = storeToRefs(store)
+
 const chartRef = ref()
-const values: number[] = [18, 16, 12, 9, 8]
 
 const { createBaseBarConfig } = useChartConfig()
 const { create3DCubeShapes, get3DCubeSeriesConfig } = use3DChartConfig()
-const { startHighlightLoop, pauseAndHighlight, delayedResume } = useChartHighlight()  // 添加新方法
+const { startHighlightLoop, pauseAndHighlight, delayedResume } = useChartHighlight()
 
-// 注册3D形状
 create3DCubeShapes()
 
-const createEchartBar = (): EChartsOption => {
-  const xAxisData = ['湖南', '广西', '江西', '福建', '湖北']
-  
+const currentValues = computed(() => visitorSourceTop5.value?.percentages || [])
+
+const option = computed<EChartsOption>(() => {
+  const visitorData = visitorSourceTop5.value
+  const values = visitorData?.percentages || []
+  const xAxisData = visitorData?.regions || []
+
   return createBaseBarConfig(xAxisData, get3DCubeSeriesConfig(values), {
     tooltip: {
       trigger: 'axis',
@@ -43,28 +49,20 @@ const createEchartBar = (): EChartsOption => {
       name: '%'
     }
   })
-}
+})
 
-// 图表加载完成回调
 const handleChartLoad = (chart: any) => {
-  // 鼠标悬停事件
   chart.on('mouseover', (params: any) => {
     if (params.dataIndex !== undefined) {
-      pauseAndHighlight(chart, params.dataIndex)  // 立即暂停并高亮悬停柱子
+      pauseAndHighlight(chart, params.dataIndex)
     }
   })
-  
-  // 鼠标移出事件
-  chart.on('mouseout', () => {
-    delayedResume()  // 1秒后恢复循环
-  })
-  
-  // 启动高亮循环
-  startHighlightLoop(chart, values.length)
-}
 
-onMounted(() => {
-  option.value = createEchartBar()
-})
+  chart.on('mouseout', () => {
+    delayedResume()
+  })
+
+  startHighlightLoop(chart, currentValues.value.length)
+}
 </script>
 <style lang="scss" scoped></style>

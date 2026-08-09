@@ -1,4 +1,3 @@
-// 广东省GeoJSON数据
 // 数据来源: https://geo.datav.aliyun.com
 
 const GuangdongGeoJSON = {

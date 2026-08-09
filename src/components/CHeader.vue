@@ -1,91 +1,62 @@
-<!-- 顶部标题 -->
 <template>
   <header class="header">广东省旅游指标监控平台</header>
+  
   <!-- 文字轮播 -->
-  <div class="text-carousel">
-    <transition-group name="carousel" tag="div" class="carousel-container">
-      <div class="text-carousel-item" :key="currentIndex" v-show="currentIndex === getCurrentItemIndex()">
-        {{ getCurrentItem() }}
+  <div class="text-carousel" @mouseenter="pause" @mouseleave="resume">
+    <transition name="carousel" mode="out-in">
+      <div 
+        v-if="carouselData.length > 0" 
+        :key="currentIndex" 
+        class="text-carousel-item"
+      >
+        {{ carouselData[currentIndex] }}
       </div>
-    </transition-group>
+      <div v-else class="text-carousel-item" key="empty">加载中...</div>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useTourismStore } from '@/stores/tourism'
 
-// 轮播数据
-const carouselData = ref([
-  '广州长隆度假区年接待量突破2000万人次，创历史新高',
-  '深圳华侨城推出数字文旅新体验，沉浸式项目受追捧',
-  '珠海长隆海洋王国入选"亚洲最佳主题公园"前十强',
-  '韶关丹霞山获评国家级生态旅游示范区，客流增长40%',
-  '清远古龙峡玻璃桥升级，暑期单日接待量超3万人次',
-  '粤港澳大湾区联合推出"一程多站"旅游线路受青睐',
-  '广州塔推出云端露营项目，夜经济收入增长显著',
-  '潮州古城举办国际潮文化节，带动民宿业蓬勃发展',
-  '肇庆七星岩引入AI智能导览，游客满意度达95%',
-  '惠州巽寮湾滨海旅游区入选国家级旅游度假区'
-])
+const store = useTourismStore()
+const { currentSnapshot } = storeToRefs(store)
 
-// 状态管理
+// ✅ 关键修改：从 currentSnapshot 取 news，加兜底
+const carouselData = computed(() => currentSnapshot.value?.news ?? [])
+
 const currentIndex = ref(0)
-const timer = ref<number | null>(null)
-const isAnimating = ref(false)
-const isPaused = ref(false)
+let timer: number | null = null
+const INTERVAL = 5000
 
-// 配置参数
-const CONFIG = {
-  INTERVAL: 5000, // 轮播间隔时间
-  ANIMATION_DURATION: 500, // 动画持续时间
-  DEBOUNCE_DELAY: 100 // 防抖延迟时间
+const nextItem = () => {
+  if (carouselData.value.length === 0) return
+  currentIndex.value = (currentIndex.value + 1) % carouselData.value.length
 }
 
-// 获取当前显示的项目
-const getCurrentItem = (): string => {
-  if (carouselData.value.length === 0) return ''
-  return carouselData.value[currentIndex.value]
+const startCarousel = () => {
+  if (timer) clearInterval(timer)
+  timer = window.setInterval(nextItem, INTERVAL)
 }
 
-// 获取当前项目索引
-const getCurrentItemIndex = (): number => {
-  return currentIndex.value
+const pause = () => {
+  if (timer) clearInterval(timer)
 }
 
-// 切换到下一项
-const nextItem = (): void => {
-  if (isAnimating.value || isPaused.value) return
-
-  try {
-    isAnimating.value = true
-
-    setTimeout(() => {
-      currentIndex.value = (currentIndex.value + 1) % carouselData.value.length
-      isAnimating.value = false
-    }, CONFIG.ANIMATION_DURATION)
-  } catch (error) {
-    console.error('轮播切换出错:', error)
-    isAnimating.value = false
-  }
-}
-
-// 启动轮播
-const startCarousel = (): void => {
-  if (timer.value) clearInterval(timer.value)
-  timer.value = window.setInterval(() => {
-    nextItem()
-  }, CONFIG.INTERVAL)
+const resume = () => {
+  startCarousel()
 }
 
 onMounted(() => {
-  // 启动轮播
   startCarousel()
 })
 
 onBeforeUnmount(() => {
-  if (timer.value) {
-    clearInterval(timer.value)
-    timer.value = null
+  if (timer) {
+    clearInterval(timer)
+    timer = null
   }
 })
 </script>
@@ -123,23 +94,13 @@ onBeforeUnmount(() => {
   font-size: 22px;
   overflow: hidden;
   cursor: pointer;
-  pointer-events: all;
+
   &:hover {
     background: linear-gradient(90deg, rgba(218, 163, 88, 0.1), #3fa7ed, rgba(218, 163, 88, 0.1));
   }
 }
 
-.carousel-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .text-carousel-item {
-  position: absolute;
   width: 100%;
   text-align: center;
   padding: 0 20px;
@@ -147,11 +108,8 @@ onBeforeUnmount(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transform: translateY(0);
-  opacity: 1;
 }
 
-// 轮播动画样式
 .carousel-enter-active,
 .carousel-leave-active {
   transition: all 0.5s ease-in-out;
@@ -165,11 +123,5 @@ onBeforeUnmount(() => {
 .carousel-leave-to {
   transform: translateY(-100%);
   opacity: 0;
-}
-
-.carousel-enter-to,
-.carousel-leave-from {
-  transform: translateY(0);
-  opacity: 1;
 }
 </style>

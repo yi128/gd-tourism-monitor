@@ -3,53 +3,34 @@
   <CPanel>
     <template #header>各行业收入</template>
     <template #content>
-      <CEcharts ref="chartRef" :option="option" @onload="startHighlightLoop" />
+      <CEcharts ref="chartRef" :option="option" @onload="handleChartLoad" />
     </template>
   </CPanel>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
 import CPanel from '@/components/common/CPanel.vue'
 import CEcharts from '@/components/common/CEcharts.vue'
+import { useTourismStore } from '@/stores/tourism'
+import { storeToRefs } from 'pinia'
 
-const option = ref<any>({})
+const store = useTourismStore()
+const { industryRevenue } = storeToRefs(store)
+
 const chartRef = ref()
 let highlightTimer: any = null
 let currentIndex = 0
-const VALUE = [100, 200, 300, 400, 500, 600, 700]
+let cachedValues: number[] = []
 
-const createEchartBar = () => {
-  const xAxisData = ['旅游', '住宿', '餐饮', '购物', '娱乐', '交通', '其他']
-  const seriesData = [
-    {
-      value: 100
-    },
-    {
-      value: 200
-    },
-    {
-      value: 300
-    },
-    {
-      value: 400
-    },
-    {
-      value: 500
-    },
-    {
-      value: 600
-    },
-    {
-      value: 700
-    }
-  ]
+const option = computed(() => {
+  const industryData = industryRevenue.value
+  const values = industryData?.values || []
+  cachedValues = values
 
-  let maxAmount = 0
-  seriesData.map(item => {
-    item.value > maxAmount ? (maxAmount = item.value) : (maxAmount = maxAmount)
-  })
+  const xAxisData = industryData?.industries || []
+  const seriesData = values.map(v => ({ value: v }))
 
   return {
     grid: {
@@ -184,37 +165,35 @@ const createEchartBar = () => {
       }
     ]
   }
-}
+})
 
-// 高亮循环方法
-const startHighlightLoop = (chart: any) => {
+const startHighlightLoop = (chart: any, values: number[]) => {
   if (!chart) return
 
-  // 如果已经存在定时器，先清除
   if (highlightTimer) {
     clearInterval(highlightTimer)
     highlightTimer = null
   }
 
+  if (!values.length) return
+
   highlightTimer = setInterval(() => {
-    // 取消之前的高亮
     chart.dispatchAction({
       type: 'downplay'
     })
-    // 高亮当前柱子
     chart.dispatchAction({
       type: 'highlight',
       seriesIndex: 0,
       dataIndex: currentIndex
     })
-    // 更新索引，循环
-    currentIndex = (currentIndex + 1) % VALUE.length
+    currentIndex = (currentIndex + 1) % values.length
   }, 1500)
 }
 
-onMounted(() => {
-  option.value = createEchartBar()
-})
+const handleChartLoad = (chart: any) => {
+  startHighlightLoop(chart, cachedValues)
+}
+
 onUnmounted(() => {
   if (highlightTimer) {
     clearInterval(highlightTimer)

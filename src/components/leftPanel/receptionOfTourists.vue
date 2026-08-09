@@ -9,17 +9,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import * as echarts from 'echarts'
 import CPanel from '@/components/common/CPanel.vue'
 import CEcharts from '@/components/common/CEcharts.vue'
-const option = ref<any>({})
-const createEchartLine = () => {
+import { useTourismStore } from '@/stores/tourism'
+import { storeToRefs } from 'pinia'
+
+const store = useTourismStore()
+const { quarterlyReception } = storeToRefs(store)
+
+const option = computed(() => {
+  const quarterlyData = quarterlyReception.value
   return {
     tooltip: {
       trigger: 'axis',
       textStyle: {
-        color: '#2c3e50' 
+        color: '#2c3e50',
+        fontSize: 16
       }
     },
     legend: {
@@ -29,7 +36,8 @@ const createEchartLine = () => {
       itemWidth: 15,
       itemHeight: 1,
       textStyle: {
-        color: '#2c3e50'
+        color: '#2c3e50',
+        fontSize: 16
       }
     },
     grid: {
@@ -41,11 +49,11 @@ const createEchartLine = () => {
     xAxis: [
       {
         type: 'category',
-        data: ['第一季度', '第二季度', '第三季度', '第四季度'],
+        data: quarterlyData?.quarters || [],
         axisLabel: {
           textStyle: {
             color: '#2c3e50',
-            fontSize:14
+            fontSize:16
           }
         },
         axisLine: {
@@ -64,7 +72,7 @@ const createEchartLine = () => {
         name: '万人次',
         nameTextStyle: {
           color: '#2c3e50', 
-          fontSize: 14,
+          fontSize: 16,
           padding: [0, 32, 12, 0]
         },
         splitNumber: 4,
@@ -77,7 +85,7 @@ const createEchartLine = () => {
         axisLabel: {
           textStyle: {
             color: '#2c3e50', 
-            fontSize: 14
+            fontSize: 16
           }
         },
         axisLine: {
@@ -87,9 +95,9 @@ const createEchartLine = () => {
     ],
     series: [
       {
-        name: '2022年',
+        name: `${quarterlyData?.series?.[0]?.year || 2022}年`,
         type: 'line',
-        data: [9080, 6440, 13540, 9650],
+        data: quarterlyData?.series?.[0]?.data || [],
         lineStyle: {
           normal: {
             width: 2,
@@ -124,9 +132,9 @@ const createEchartLine = () => {
         symbol: 'none'
       },
       {
-        name: '2023年',
+        name: `${quarterlyData?.series?.[1]?.year || 2023}年`,
         type: 'line',
-        data: [22800, 19800, 22500, 20500],
+        data: quarterlyData?.series?.[1]?.data || [],
         lineStyle: {
           normal: {
             width: 2,
@@ -165,9 +173,6 @@ const createEchartLine = () => {
       }
     ]
   }
-}
-onMounted(() => {
-  option.value = createEchartLine()
 })
 </script>
 <style lang="scss" scoped></style>

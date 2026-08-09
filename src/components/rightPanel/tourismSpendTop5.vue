@@ -9,21 +9,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import CPanel from '@/components/common/CPanel.vue'
 import CEcharts from '@/components/common/CEcharts.vue'
 import { useChartConfig } from '@/composables/useChartConfig'
 import useChartHighlight from '@/composables/useChartHighlight'
+import { useTourismStore } from '@/stores/tourism'
+import { storeToRefs } from 'pinia'
 
-const option = ref<any>({})
+const store = useTourismStore()
+const { tourismSpendTop5 } = storeToRefs(store)
+
 const chartRef = ref()
 const { createBaseBarConfig, createConeBarSeries } = useChartConfig()
 const { startHighlightLoop, pauseAndHighlight, delayedResume } = useChartHighlight()
 
-const createChart = () => {
-  const xAxisData = ['交通', '住宿', '餐饮', '购物', '门票娱乐']
-  const dataValues = [28, 24, 22, 18, 8]
-  
+const currentLength = computed(() => {
+  return tourismSpendTop5.value?.percentages?.length || 0
+})
+
+const option = computed(() => {
+  const spendData = tourismSpendTop5.value
+  const xAxisData = spendData?.categories || []
+  const dataValues = spendData?.percentages || []
+
   const series = [createConeBarSeries(dataValues)]
 
   return createBaseBarConfig(xAxisData, series, {
@@ -43,32 +52,24 @@ const createChart = () => {
       axisLabel: {
         fontSize: 16,
         interval: 0,
-        margin: 10, 
+        margin: 10,
         align: 'center'
       }
     }
   })
-}
+})
 
-// 图表加载完成回调
 const handleChartLoad = (chart: any) => {
-  // 鼠标悬停事件
   chart.on('mouseover', (params: any) => {
     if (params.dataIndex !== undefined) {
-      pauseAndHighlight(chart, params.dataIndex)  // 立即暂停并高亮悬停柱子
+      pauseAndHighlight(chart, params.dataIndex)
     }
   })
-  
-  // 鼠标移出事件
-  chart.on('mouseout', () => {
-    delayedResume()  
-  })
-  
-  // 启动高亮循环
-  startHighlightLoop(chart, 5) 
-}
 
-onMounted(() => {
-  option.value = createChart()
-})
+  chart.on('mouseout', () => {
+    delayedResume()
+  })
+
+  startHighlightLoop(chart, currentLength.value)
+}
 </script>

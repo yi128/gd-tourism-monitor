@@ -11,77 +11,50 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import CPanel from '@/components/common/CPanel.vue'
 import CEcharts from '@/components/common/CEcharts.vue'
 import defaultIcon from '@/assets/images/real-circle-defalut.png'
 import hotIcon from '@/assets/images/real-circle-hot.png'
-const option = ref<any>({})
-const initEcharts = () => {
-  const wordsData: {
-    name: string
-    value: number
-    position: number[]
-  }[] = [
-    {
-      name: '澳车北上',
-      value: 18,
-      position: [50, 50]
-    },
-    {
-      name: '演唱会',
-      value: 15,
-      position: [10, 30]
-    },
-    {
-      name: '寻味广东',
-      value: 12,
-      position: [85, 80]
-    },
-    {
-      name: '博物馆热',
-      value: 7,
-      position: [27, 55]
-    },
-    {
-      name: '反向旅游',
-      value: 7,
-      position: [68, 17]
-    },
+import { useTourismStore } from '@/stores/tourism'
+import { storeToRefs } from 'pinia'
 
-    {
-      name: '湾区之夜',
-      value: 10,
-      position: [20, 90]
-    },
-    {
-      name: '研学旅行',
-      value: 5,
-      position: [35, 20]
-    },
-    {
-      name: '海岛度假',
-      value: 4,
-      position: [65, 89]
-    },
-    {
-      name: '广深港高铁提速',
-      value: 3,
-      position: [90, 40]
-    }
-  ]
-  const optionData: any = []
-  // 渲染数据，并写入chart
-  wordsData.map((item: any) => {
-    optionData.push({
+const store = useTourismStore()
+const { currentSnapshot } = storeToRefs(store)
+
+// 预定义 9 个不重叠的坐标位置（x: 0-100, y: 0-100）
+// 按视觉重要性从中心向四周扩散
+const POSITIONS: [number, number][] = [
+  [50, 72],  // 中心偏上 —— 给热度最高的词
+  [22, 58],  // 左上
+  [78, 58],  // 右上
+  [18, 32],  // 左中
+  [82, 32],  // 右中
+  [35, 18],  // 左下
+  [65, 18],  // 右下
+  [12, 78],  // 最左
+  [88, 78],  // 最右
+]
+
+const option = computed(() => {
+  // ✅ 从 currentSnapshot 取 hotWords，兜底空数组
+  const wordsData = currentSnapshot.value?.hotWords ?? []
+  
+  // 按热度从高到低排序，依次分配最佳位置
+  const sortedWords = [...wordsData].sort((a, b) => b.value - a.value)
+  
+  const optionData = sortedWords.map((item, index) => {
+    const pos = POSITIONS[index] || [50, 50]
+    return {
       name: item.name,
       number: item.value,
-      value: item.position,
+      value: pos,  // ✅ 用预定义坐标，不再依赖旧版 position
       symbolSize: item.value > 15 ? 70 : 60,
       symbol: item.value > 15 ? 'image://' + hotIcon : 'image://' + defaultIcon
-    })
+    }
   })
-  const options: any = {
+
+  return {
     grid: {
       show: false,
       top: 20,
@@ -99,63 +72,56 @@ const initEcharts = () => {
     ],
     yAxis: [
       {
+        type: 'value',  // ✅ 补全 type
         min: 0,
         show: false,
         max: 100
       }
     ],
-
     series: [
       {
         type: 'scatter',
         label: {
-          normal: {
-            show: true,
-            formatter: (params: any) => {
-              if (params.data.number > 15) {
-                return `{hotName|${params.data.name}}\n{hotValue|${params.data.number}%}`
-              } else {
-                return `{name|${params.data.name}}\n{value|${params.data.number}%}`
-              }
+          show: true,
+          formatter: (params: any) => {
+            if (params.data.number > 15) {
+              return `{hotName|${params.data.name}}\n{hotValue|${params.data.number}}`
+            } else {
+              return `{name|${params.data.name}}\n{value|${params.data.number}}`
+            }
+          },
+          rich: {
+            hotName: {
+              color: '#FFFFFF',
+              fontSize: 18,
+              padding: [0, 0, 8, 0],
+              align: 'center'
             },
-            rich: {
-              hotName: {
-                color: '#FFFFFF',
-                fontSize: 18,
-                padding: [0, 0, 8, 0],
-                align: 'center'
-              },
-              hotValue: {
-                color: '#F0F8FF',
-                fontSize: 16
-              },
-              name: {
-                color: '#F5F5F5',
-                fontSize: 15,
-                padding: [0, 0, 8, 0],
-                align: 'center'
-              },
-              value: {
-                color: '#E6E6FA',
-                fontSize: 14,
-                align: 'center'
-              }
+            hotValue: {
+              color: '#F0F8FF',
+              fontSize: 16,
+              align: 'center'
+            },
+            name: {
+              color: '#F5F5F5',
+              fontSize: 15,
+              padding: [0, 0, 8, 0],
+              align: 'center'
+            },
+            value: {
+              color: '#E6E6FA',
+              fontSize: 14,
+              align: 'center'
             }
           }
         },
         animationDurationUpdate: 500,
         animationEasingUpdate: 500,
-        animationDelay: function (idx: number) {
-          return idx * 100
-        },
+        animationDelay: (idx: number) => idx * 100,
         data: optionData
       }
     ]
   }
-  return options
-}
-onMounted(() => {
-  option.value = initEcharts()
 })
 </script>
 

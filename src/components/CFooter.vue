@@ -2,18 +2,14 @@
 <template>
   <footer class="number-footer">
     <div class="number-item" v-for="item in numberData" :key="item.id">
-      <!-- 标题 -->
       <div class="title">{{ item.title }}</div>
-      <!-- 数据 -->
       <div class="data">
         <img class="data-img" :src="item.img" alt="图标" />
         <div class="data-info">
-          <!-- 数字 -->
           <div class="number">
             <Vue3Odometer class="number-value" :value="item.value" />
             <span class="number-unit">{{ item.unit }}</span>
           </div>
-          <!-- 比较信息 -->
           <div class="compare">
             <span class="compare-label">较上次</span>
             <img class="compare-img" :src="item.compare === 'up' ? up : down" alt="上涨下跌图标" />
@@ -31,7 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import Vue3Odometer from 'vue3-odometer'
 import 'odometer/themes/odometer-theme-default.css'
 import 行李箱图标 from '@/assets/images/行李箱图标.png'
@@ -39,45 +36,34 @@ import 收入图标 from '@/assets/images/收入图标.png'
 import 刷卡图标 from '@/assets/images/刷卡图标.png'
 import up from '@/assets/images/up.png'
 import down from '@/assets/images/down.png'
-const numberData = ref<any>([
-  {
-    title: '2023年旅游业收入',
-    value: 9525.58,
-    unit: '亿元',
-    compare: 'up',
-    proportion: 15.8,
-    img: 收入图标
-  },
-  {
-    title: '2023年来访游客数',
-    value: 8.74,
-    unit: '亿人',
-    compare: 'up',
-    proportion: 12.4,
-    img: 行李箱图标
-  },
-  {
-    title: '2023年广东人口出游支出',
-    value: 4.91,
-    unit: '万亿元',
-    compare: 'up',
-    proportion: 140.3,
-    img: 刷卡图标
-  }
-])
+import { useTourismStore } from '@/stores/tourism'
+
+const store = useTourismStore()
+const { footerStats } = storeToRefs(store)
+
+const iconMap: Record<number, string> = {
+  0: 收入图标,
+  1: 行李箱图标,
+  2: 刷卡图标
+}
+
+const localData = ref<any[]>([])
+
+const numberData = computed(() =>
+  localData.value.map((item, idx) => ({
+    ...item,
+    img: iconMap[idx]
+  }))
+)
 
 let intervalId: any = null
-
-// 用于存储上一次的 value 值
-const lastValues = ref<number[]>(numberData.value.map((item: any) => item.value))
+let lastValues: number[] = []
 
 function randomizeNumberData() {
-  numberData.value = numberData.value.map((item: any, idx: number) => {
-    // 生成一个基于当前值的随机浮动（±10%）
-    const randomFactor = 1 + (Math.random() - 0.5) * 0.2 // ±10%
-    const prevValue = lastValues.value[idx]
+  localData.value = localData.value.map((item: any, idx: number) => {
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.2
+    const prevValue = lastValues[idx]
     const newValue = +(item.value * randomFactor).toFixed(1)
-    // 计算变化百分比
     let proportion = 0
     let compare: 'up' | 'down' = 'up'
     if (prevValue !== 0) {
@@ -85,8 +71,7 @@ function randomizeNumberData() {
       compare = proportion >= 0 ? 'up' : 'down'
       proportion = Math.abs(proportion)
     }
-    // 更新lastValues
-    lastValues.value[idx] = newValue
+    lastValues[idx] = newValue
     return {
       ...item,
       value: newValue,
@@ -96,9 +81,20 @@ function randomizeNumberData() {
   })
 }
 
+const syncFromStore = () => {
+  const stats = footerStats.value
+  if (stats && stats.length > 0) {
+    localData.value = stats.map(item => ({ ...item }))
+    lastValues = stats.map(item => item.value)
+  }
+}
+
+watch(footerStats, () => {
+  syncFromStore()
+})
+
 onMounted(() => {
-  // 初始化lastValues
-  lastValues.value = numberData.value.map((item: any) => item.value)
+  syncFromStore()
   intervalId = window.setInterval(() => {
     randomizeNumberData()
   }, 10000)

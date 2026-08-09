@@ -12,6 +12,7 @@
       </div>
       <!-- 中间地图区域 -->
       <div class="map-container">
+        <TimelineSlider />
         <CMap />
       </div>
       <!-- 右侧数据面板 -->

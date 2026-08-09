@@ -146,6 +146,8 @@ export const useChartConfig = () => {
             },
             emphasis: {
                 itemStyle: {
+                    // 设置渐变颜色
+                    // 渐变方向，从下到上
                     color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
                         { offset: 0, color: 'rgba(218, 163, 88, 0.3)' },
                         { offset: 0.6, color: 'rgba(218, 163, 88, 0.8)' },

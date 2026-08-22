@@ -6,64 +6,56 @@ import lineTop3 from '@/assets/images/lineTop3.png'
 import lineTop4 from '@/assets/images/lineTop4.png'
 import lineTop5 from '@/assets/images/lineTop5.png'
 import mapBg from '@/assets/images/mapBg.png'
-echarts.registerMap('gd', gdData as any)
+
+// ✅ 防重复注册
+if (!echarts.getMap('gd')) {
+  echarts.registerMap('gd', gdData as any)
+}
+
 const lineTopList: any = [lineTop1, lineTop2, lineTop3, lineTop4, lineTop5]
+
 // 获取地图配置
 export const getMapOption = () => {
-  // 渐变层颜色
-  const colorList: string[] = [
-    '#8b5e70',
-    '#81596d',
-    '#78556a',
-    '#6e5068',
-    '#644c65',
-    '#5b4762',
-    '#51435f',
-    '#483e5c',
-    '#3e3a59',
-    '#343557',
-    '#2b3154',
-    '#212c51'
+  // 3 层立体渐变（替代原来的 12 层）
+  const geoLayers = [
+    { color: '#2b3154', offsetY: '58.0%', z: 10 },   // 底层：最深，偏移最大
+    { color: '#5b4762', offsetY: '56.5%', z: 11 },   // 中层：中等
+    { color: '#5b4e62', offsetY: '55.0%', z: 12 },   // 顶层：最浅，紧贴地图
   ]
-  // 生成渐变图层
-  const geoList: any = []
-  for (let i = 1; i <= colorList.length; i++) {
-    const mapOption: any = {
-      map: 'gd',
-      aspectScale: 0.85,
-      emphasis: {
-        disabled: true
-      },
-      z: 12 - i,
-      layoutCenter: ['50%', `${i * 0.3 + 55}%`], //地图位置
-      layoutSize: '90%',
-      itemStyle: {
-        normal: {
-          areaColor: colorList[i - 1],
-          borderWidth: 0
-        }
+
+  const geoList = geoLayers.map((layer, i) => ({
+    map: 'gd',
+    aspectScale: 0.85,
+    emphasis: { disabled: true },
+    z: layer.z,
+    layoutCenter: ['50%', layer.offsetY],
+    layoutSize: '90%',
+    itemStyle: {
+      normal: {
+        areaColor: layer.color,
+        borderWidth: 0,
+        // 最底层加阴影，增强立体感
+        ...(i === 0 ? {
+          shadowColor: 'rgba(0, 0, 0, 0.6)',
+          shadowBlur: 60
+        } : {})
       }
     }
-    if (i === colorList.length) {
-      mapOption.itemStyle.normal.shadowColor = 'rgba(0, 0, 0, 0.71)'
-      mapOption.itemStyle.normal.shadowBlur = 100
-    }
-    geoList.push(mapOption)
-  }
+  }))
+
   // 获取柱状图配置
   const lineSeriesData = getLineData()
-  const option = {
+
+  return {
     geo: [
       // 最外围发光边界
       {
         map: 'gd',
         aspectScale: 0.85,
-        layoutCenter: ['50%', '55%'], //地图位置
+        layoutCenter: ['50%', '55%'],
         layoutSize: '90%',
         z: 12,
-        emphasis: {
-          disabled: true
-        },
+        emphasis: { disabled: true },
         itemStyle: {
           normal: {
             borderColor: 'rgb(180, 137, 81)',
@@ -77,13 +69,18 @@ export const getMapOption = () => {
       {
         map: 'gd',
         aspectScale: 0.85,
-        layoutCenter: ['50%', '55%'], //地图位置
+        layoutCenter: ['50%', '55%'],
         layoutSize: '90%',
-        z: 14,
+        z: 16,
         itemStyle: {
           normal: {
-            areaColor: 'rgba(106, 125, 171, 0.45)',
+            areaColor: 'rgba(106, 125, 171, 0.1)',
             borderWidth: 0
+          }
+        },
+        emphasis: {
+          itemStyle: {
+            areaColor: 'rgba(255, 187, 94, 0.3)',
           }
         },
         label: {
@@ -96,22 +93,21 @@ export const getMapOption = () => {
       {
         map: 'gd',
         aspectScale: 0.85,
-        layoutCenter: ['50%', '55%'], //地图位置
+        layoutCenter: ['50%', '55%'],
         layoutSize: '90%',
-        z: 12,
-        emphasis: {
-          disabled: true
-        },
+        z: 15,
+        emphasis: { disabled: true },
         itemStyle: {
           normal: {
             areaColor: {
               image: mapBg,
             },
-            borderColor: '#8aa5db',
-            borderWidth: 1
+            borderColor: 'rgba(201, 137, 46, 0.81)',
+            borderWidth: 2
           }
         }
       },
+      // 3 层立体渐变（替代原来的 12 层）
       ...geoList
     ],
     series: [
@@ -119,7 +115,6 @@ export const getMapOption = () => {
       ...lineSeriesData
     ]
   }
-  return option
 }
 
 // 生成地图数据柱数据
@@ -214,7 +209,7 @@ const getLineData = () => {
       symbol: 'circle',
       symbolSize: [8, 4],
       itemStyle: {
-        color: 'rgba(255, 255, 179, 1)'
+        color: 'rgb(255, 239, 179)'
       },
       silent: true,
       data: [
@@ -258,7 +253,7 @@ const getLineData = () => {
     }
     // 底部光圈
     const lineBottomCircle: any = {
-      name: 'Top 5',
+      name: 'Top 5',
       type: 'effectScatter',
       coordinateSystem: 'geo',
       data: [
@@ -273,13 +268,11 @@ const getLineData = () => {
         brushType: 'stroke'
       },
       label: {
-        normal: {
-          formatter: '{b}',
-          position: 'bottom',
-          show: false,
-          color: '#fff',
-          distance: 10
-        }
+        formatter: '{b}',
+        position: 'bottom',
+        show: false,
+        color: '#fff',
+        distance: 10
       },
       symbol: 'circle',
       symbolSize: [20, 10],

@@ -19,6 +19,8 @@
       <div class="right-panel-container">
         <RightPanel />
       </div>
+      <!-- AI数据助手 -->
+      <AIDataAssistant />
     </div>
     <!-- 底部组件 -->
     <div class="footer-container">
@@ -32,6 +34,7 @@ import CHeader from '@/components/CHeader.vue'
 import CMap from '@/components/CMap.vue'
 import LeftPanel from '@/components/leftPanel.vue'
 import RightPanel from '@/components/rightPanel.vue'
+import AIDataAssistant from '@/components/AIInsight/index.vue'
 import CFooter from '@/components/CFooter.vue'
 import { onMounted } from 'vue'
 import autofit from 'autofit.js'
@@ -48,6 +51,11 @@ onMounted(() => {
 <style lang="scss" scoped>
 .layout-container{
   background: linear-gradient(135deg, #e6f7ff 0%, #b3e0ff 50%, #80d0ff 100%);
+}
+.main-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 .map-container {
   padding: 0;

@@ -23,8 +23,6 @@ import { useTourismStore } from '@/stores/tourism'
 
 const store = useTourismStore()
 const { currentSnapshot } = storeToRefs(store)
-
-// ✅ 关键修改：从 currentSnapshot 取 news，加兜底
 const carouselData = computed(() => currentSnapshot.value?.news ?? [])
 
 const currentIndex = ref(0)

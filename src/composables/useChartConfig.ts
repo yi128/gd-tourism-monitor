@@ -324,13 +324,11 @@ export const use3DChartConfig = () => {
             {
                 type: 'bar',
                 label: {
-                    normal: {
-                        show: true,
-                        position: 'top',
-                        fontSize: 18,
-                        color: '#2c3e50',
-                        offset: [0, -25]
-                    }
+                    show: true,
+                    position: 'top',
+                    fontSize: 18,
+                    color: '#2c3e50',
+                    offset: [0, -25]
                 },
                 itemStyle: {
                     color: 'transparent'

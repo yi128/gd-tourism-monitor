@@ -3,13 +3,14 @@
   <CPanel class="age-distribution">
     <template #header>游客来源地TOP5</template>
     <template #content>
-      <CEcharts ref="chartRef" :option="option" @onload="handleChartLoad" />
+      <CEcharts ref="chartRef" :option="option" />
     </template>
   </CPanel>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
+import * as echarts from 'echarts'
 import CPanel from '@/components/common/CPanel.vue'
 import CEcharts from '@/components/common/CEcharts.vue'
 import type { EChartsOption } from 'echarts'
@@ -22,10 +23,11 @@ const store = useTourismStore()
 const { visitorSourceTop5 } = storeToRefs(store)
 
 const chartRef = ref()
+let chartInstance: any = null
 
 const { createBaseBarConfig } = useChartConfig()
 const { create3DCubeShapes, get3DCubeSeriesConfig } = use3DChartConfig()
-const { startHighlightLoop, pauseAndHighlight, delayedResume } = useChartHighlight()
+const { startHighlightLoop, stopHighlightLoop, pauseAndHighlight, delayedResume } = useChartHighlight()
 
 create3DCubeShapes()
 
@@ -45,25 +47,51 @@ const option = computed<EChartsOption>(() => {
         return `${item.name}: ${item.value}%`
       }
     },
-    yAxis: {
-      name: '%'
-    }
+    yAxis: { name: '%' }
   })
 })
 
-const handleChartLoad = (chart: any) => {
-  console.log('✅ chart onload 触发', chart?.id, '数据长度:', currentValues.value.length)
+// ========== 核心修复：自己从 DOM 找 chart 实例 ==========
+
+const resolveChart = () => {
+  if (chartInstance) return chartInstance
+  const el = chartRef.value?.$el
+  if (!el) return null
+  const inst = echarts.getInstanceByDom(el)
+  if (inst) chartInstance = inst
+  return inst
+}
+const setupHighlight = (chart: any) => {
+  // 先清理旧绑定，防止重复
+  chart.off('mouseover')
+  chart.off('mouseout')
+  chart.off('globalout')
+  stopHighlightLoop()
+
   chart.on('mouseover', (params: any) => {
     if (params.dataIndex !== undefined) {
       pauseAndHighlight(chart, params.dataIndex)
     }
   })
-
-  chart.on('mouseout', () => {
-    delayedResume()
-  })
+  chart.on('mouseout', () => delayedResume())
+  chart.on('globalout', () => delayedResume())
 
   startHighlightLoop(chart, currentValues.value.length)
 }
+
+// 数据就绪后，等 CEcharts 内部 setOption 完成，再初始化高亮
+watch(currentValues, (vals) => {
+  if (vals.length === 0) return
+
+  nextTick(() => {
+    const timer = setInterval(() => {
+      const chart = resolveChart()
+      if (chart) {
+        clearInterval(timer)
+        setupHighlight(chart)
+      }
+    }, 100)
+  })
+}, { immediate: true })
 </script>
 <style lang="scss" scoped></style>

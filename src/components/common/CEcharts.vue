@@ -5,67 +5,68 @@
 <script lang="ts" setup>
 import { ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts'
-
 const prop = withDefaults(defineProps<{ option: any }>(), {
-  option: () => ({})
+  option: () => {
+    return {}
+  }
 })
-
-const state = reactive({ option: null as any })
-let echartsInstance: echarts.ECharts | null = null
-let hasOnloaded = false   // ✅ 新增：防止重复 emit
-const echartsRef = ref()
-
-const emit = defineEmits(['eclick', 'onload'])
-
-const tryEmitOnload = () => {
-  if (hasOnloaded || !echartsInstance) return
-  hasOnloaded = true
-  emit('onload', echartsInstance)
-}
-
-// watch 保持原样，处理 option 后续变化
+const state = reactive({
+  option: null
+})
 watch(
   () => prop.option,
   () => {
     state.option = prop.option
     if (state.option) {
       echartsInstance?.setOption(state.option)
-      tryEmitOnload()   // ✅ 用 tryEmitOnload 替代直接 emit
+      emit('onload', echartsInstance)
     }
   },
   { immediate: false, deep: true }
 )
-
-onMounted(() => {
-  state.option = prop.option
-  
-  if (!echartsInstance) {
-    echartsInstance = echarts.init(echartsRef.value as HTMLDivElement)
-    echartsInstance.on('click', (val: any) => {
-      emit('eclick', val)
-    })
-  }
-  
-  if (state.option) {
-    echartsInstance.setOption(state.option)
-  }
-  
-  window.addEventListener('resize', echartsResize)
-  
-  // ✅ 关键修复：初始化完成后立即通知父组件
-  tryEmitOnload()
+let echartsInstance: echarts.ECharts | null = null
+const echartsRef = ref()
+defineExpose({
+  setDataZoom
 })
-
-function echartsResize() {
+const echartsResize = () => {
+  console.log('resize')
   echartsInstance?.resize()
 }
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', echartsResize)
-  echartsInstance?.dispose()
+function setDataZoom(start: any, end: any) {
+  ;(state.option as any).dataZoom[0].start = start
+  ;(state.option as any).dataZoom[0].end = end
+  echartsInstance?.setOption(state.option as any)
+}
+const emit = defineEmits(['eclick', 'onload'])
+onMounted(() => {
+  state.option = prop.option
+  if (echartsInstance) {
+    if (state.option) {
+      echartsInstance?.setOption(state.option)
+    }
+  } else {
+    echartsInstance = echarts.init(echartsRef.value as HTMLDivElement)
+    echartsInstance.on('click', function (val:any) {
+      Eaclick(val)
+    })
+    if (state.option) {
+      echartsInstance?.setOption(state.option)
+    }
+  }
+  window.addEventListener('resize', echartsResize)
+  if (echartsInstance && state.option) {
+    emit('onload', echartsInstance)
+  }
 })
-
-defineExpose({ setDataZoom: () => {} })  // 保留你原来的 expose
+const Eaclick = (val: any) => {
+  emit('eclick', val)
+}
+onBeforeUnmount(() => {
+  if (!echartsInstance) return
+  window.removeEventListener('resize', echartsResize)
+  echartsInstance.dispose()
+})
 </script>
 
 <style scoped lang="scss">

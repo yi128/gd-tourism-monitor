@@ -6,6 +6,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6.1.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![ECharts](https://img.shields.io/badge/ECharts-5.6.0-AA344D?style=for-the-badge&logo=apache-echarts&logoColor=white)
+![ElementPlus](https://img.shields.io/badge/Element_Plus-2.11.5-409EFF?style=for-the-badge&logo=element&logoColor=white)
 
 
 [在线预览](https://690384f3cb62760008e17eb0--snazzy-pony-43de35.netlify.app/) • [项目介绍](#项目介绍) • [功能特色](#功能特色) • [技术栈](#技术栈) • [快速开始](#快速开始)
@@ -62,6 +63,14 @@
 - **响应式设计**：适配不同屏幕尺寸
 - **自定义字体**：独特的LED数字字体
 
+### 🤖 AI 数据助手
+
+- **悬浮面板**：可折叠的 AI 对话面板，覆盖在右侧图表之上
+- **模块化架构**：输入框、对话历史、预设标签独立组件，职责清晰
+- **组合式胶水层**：`useAIChat` composable 管理消息状态与 SSE 连接
+- **流式渲染预留**：对话历史组件支持流式输出扩展
+- **预设问题标签**：空状态下提供快捷提问入口
+
 ---
 
 ## 🛠️ 技术栈
@@ -72,6 +81,8 @@
 | **TypeScript**           | 5.7.2  | 类型安全       |
 | **Vite**                 | 6.1.0  | 构建工具       |
 | **ECharts**              | 5.6.0  | 数据可视化     |
+| **Element Plus**         | 2.11.5 | UI 组件库      |
+| **Pinia**                | 2.3.1  | 状态管理       |
 | **Sass**                 | 1.89.2 | CSS预处理器    |
 | **Vue3-scroll-seamless** | 1.0.6  | 无缝滚动       |
 | **autofit.js**           | 3.2.8  | 大屏自适应缩放 |
@@ -85,6 +96,9 @@
 - **自定义图形**：3D立方体、特殊形状等自定义图表
 - **动态高亮**：定时器控制的循环高亮效果
 - **autofit.js 大屏自适应缩放**：自动适配不同分辨率，保证大屏展示效果
+- **Pinia 状态管理**：集中管理旅游数据快照与响应式状态
+- **Element Plus**：提供输入框、图标等 UI 基础组件
+- **Composables 架构**：`useAIChat` 胶水层解耦 AI 对话逻辑与 UI
 
 ---
 
@@ -131,15 +145,37 @@ pnpm preview
 广东省智慧旅游数据监控平台/
 ├── src/
 │   ├── components/          # 组件目录
-│   │   ├── common/         # 通用组件
+│   │   ├── common/         # 通用组件（CPanel、CEcharts）
 │   │   ├── leftPanel/      # 左侧面板组件
-│   │   └── rightPanel/     # 右侧面板组件
+│   │   ├── rightPanel/     # 右侧面板组件
+│   │   ├── AIInsight/      # AI 数据助手模块
+│   │   │   ├── index.vue          # 组装器：布局 + 数据流
+│   │   │   ├── AIInputBar.vue     # 输入框组件
+│   │   │   ├── PresetTags.vue     # 预设标签组件
+│   │   │   ├── AIChatHistory.vue  # 对话历史组件
+│   │   │   └── composables/
+│   │   │       └── useAIChat.ts   # 胶水层：SSE + 消息状态
+│   │   ├── CHeader.vue     # 顶部标题
+│   │   ├── CFooter.vue     # 底部
+│   │   ├── CMap.vue        # 地图组件
+│   │   └── TimelineSlider.vue # 时间轴
+│   ├── composables/        # 组合式函数
+│   │   ├── useChartConfig.ts
+│   │   └── useChartHighlight.ts
+│   ├── stores/             # Pinia 状态管理
+│   │   └── tourism.ts
+│   ├── modules/            # 业务模块
+│   │   └── echartMap.ts
+│   ├── data/               # 数据文件
+│   │   └── cityStats.ts
+│   ├── page/               # 页面入口
+│   │   └── index.vue
 │   ├── assets/             # 静态资源
 │   │   ├── data/          # 数据文件
 │   │   └── images/        # 图片资源
 │   ├── styles/            # 样式文件
-│   └── types/
-|   |__ composables        # 组合式函数
+│   ├── types/             # 类型定义
+│   └── main.ts            # 应用入口
 ├── public/                # 公共资源
 ├── design/                # 设计源文件
 └── package.json          # 项目配置
@@ -156,6 +192,8 @@ pnpm preview
 - **无缝滚动**：流畅的列表滚动效果
 - **响应式布局**：适配不同设备屏幕
 - **实时更新**：动态数据更新和展示
+- **AI 悬浮面板**：可折叠的 AI 助手面板，支持流式对话扩展
+- **预设问题**：空状态下一键发送预设提问
 
 ---
 
@@ -169,6 +207,7 @@ pnpm preview
 - 遵循 Vue 3 Composition API 最佳实践
 - 保持代码风格一致，使用 ESLint + Prettier
 - 添加适当的注释和文档
+- AIInsight 模块遵循 **组装器 + 纯子组件 + composables 胶水层** 的分层架构
 
 ### 提交规范
 
@@ -208,4 +247,3 @@ chore: 构建过程或辅助工具的变动
 Made with ❤️ in Guangdong, China
 
 </div>
-

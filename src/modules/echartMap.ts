@@ -7,7 +7,7 @@ import lineTop4 from '@/assets/images/lineTop4.png'
 import lineTop5 from '@/assets/images/lineTop5.png'
 import mapBg from '@/assets/images/mapBg.png'
 
-// ✅ 防重复注册
+// 防止重复注册
 if (!echarts.getMap('gd')) {
   echarts.registerMap('gd', gdData as any)
 }
@@ -16,7 +16,7 @@ const lineTopList: any = [lineTop1, lineTop2, lineTop3, lineTop4, lineTop5]
 
 // 获取地图配置
 export const getMapOption = () => {
-  // 3 层立体渐变（替代原来的 12 层）
+  // 3 层立体渐变
   const geoLayers = [
     { color: '#2b3154', offsetY: '58.0%', z: 10 },   // 底层：最深，偏移最大
     { color: '#5b4762', offsetY: '56.5%', z: 11 },   // 中层：中等

@@ -11,7 +11,7 @@ export const useTourismStore = defineStore('tourism', () => {
 
     // ========== Getters ==========
 
-    /** 当前年份的快照数据（给左右面板 + 上下用） */
+    /** 当前年份的快照数据（给数据面板用） */
     const currentSnapshot = computed<YearSnapshot | undefined>(() =>
         yearSnapshots.find(s => s.year === selectedYear.value)
     )

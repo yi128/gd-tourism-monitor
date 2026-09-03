@@ -1,14 +1,10 @@
 <template>
   <div class="ai-insight">
-    <!-- 右上角按钮 -->
     <button class="ai-toggle-btn" :class="{ active: isOpen }" @click="togglePanel">
-      <el-icon class="ai-icon">
-        <ChatDotRound />
-      </el-icon>
+      <el-icon class="ai-icon"><ChatDotRound /></el-icon>
       <span>AI数据助手</span>
     </button>
 
-    <!-- 悬浮面板 -->
     <transition name="panel-fade">
       <div v-if="isOpen" class="ai-panel">
         <div class="ai-panel-header">
@@ -16,29 +12,24 @@
             <el-icon class="title-icon"><MagicStick /></el-icon>
             <span>AI 数据助手</span>
           </div>
-          <el-icon class="close-icon" @click="closePanel">
-            <Close />
-          </el-icon>
+          <el-icon class="close-icon" @click="closePanel"><Close /></el-icon>
         </div>
 
         <div class="ai-panel-body">
-          <AIChatHistory
-            ref="chatHistoryRef"
-            :messages="messages"
-          />
-
+          <AIChatHistory ref="chatHistoryRef" :messages="messages" />
           <PresetTags
-            v-if="messages.length === 0"
+            v-if="!hasMessages"
             :tags="presetTags"
             @select="onPresetSelect"
           />
         </div>
 
         <div class="ai-panel-footer">
-          <AIInputBar
-            v-model="inputText"
-            @send="handleSend"
-          />
+          <div v-if="isLoading" class="typing-indicator">
+            <span>AI 正在思考</span>
+            <span class="dots">...</span>
+          </div>
+          <AIInputBar v-model="inputText" @send="handleSend" />
         </div>
       </div>
     </transition>
@@ -46,17 +37,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { ChatDotRound, MagicStick, Close } from '@element-plus/icons-vue'
 import AIInputBar from './AIInputBar.vue'
 import PresetTags from './PresetTags.vue'
 import AIChatHistory from './AIChatHistory.vue'
-import type { ChatMessage } from './composables/useAIChat'
+import { useAIChat } from './composables/useAIChat'
 
 const isOpen = ref(false)
 const inputText = ref('')
-const messages = ref<ChatMessage[]>([])
 const chatHistoryRef = ref<InstanceType<typeof AIChatHistory> | null>(null)
+
+const { messages, isLoading, hasMessages, sendMessage } = useAIChat()
 
 const presetTags = [
   '各市旅游收入排名前三？',
@@ -73,32 +65,26 @@ const closePanel = () => {
 }
 
 const scrollToBottom = () => {
-  chatHistoryRef.value?.scrollToBottom()
+  nextTick(() => {
+    chatHistoryRef.value?.scrollToBottom()
+  })
 }
+
+// 消息变化时自动滚动
+watch(messages, scrollToBottom, { deep: true })
 
 const onPresetSelect = (tag: string) => {
   handleSend(tag)
 }
 
-const handleSend = (text: string) => {
-  if (!text) return
-
-  messages.value.push({ role: 'user', content: text })
-  inputText.value = ''
-  scrollToBottom()
-
-  // TODO: 接入 useAIChat 后替换为真实调用
-  setTimeout(() => {
-    messages.value.push({
-      role: 'assistant',
-      content: '正在思考中...（AI接口待接入）',
-    })
-    scrollToBottom()
-  }, 600)
+const handleSend = async (text: string) => {
+  if (!text.trim() || isLoading.value) return
+  await sendMessage(text)  
 }
 </script>
 
 <style lang="scss" scoped>
+/* 你原来的样式完全保留，只加了 typing-indicator */
 .ai-insight {
   position: absolute;
   top: 111px;
@@ -107,7 +93,6 @@ const handleSend = (text: string) => {
   font-family: inherit;
 }
 
-/* 按钮 */
 .ai-toggle-btn {
   display: flex;
   align-items: center;
@@ -139,7 +124,6 @@ const handleSend = (text: string) => {
   }
 }
 
-/* 悬浮面板 */
 .ai-panel {
   position: fixed;
   top: 120px;
@@ -162,7 +146,6 @@ const handleSend = (text: string) => {
   backdrop-filter: blur(8px);
 }
 
-/* 面板头部 */
 .ai-panel-header {
   display: flex;
   align-items: center;
@@ -202,7 +185,6 @@ const handleSend = (text: string) => {
   }
 }
 
-/* 面板主体 */
 .ai-panel-body {
   flex: 1;
   overflow: hidden;
@@ -212,14 +194,30 @@ const handleSend = (text: string) => {
   gap: 12px;
 }
 
-/* 面板底部 */
 .ai-panel-footer {
   padding: 12px 16px 16px;
   border-top: 1px solid rgba(114, 198, 247, 0.2);
   background: rgba(0, 20, 50, 0.4);
 }
 
-/* 过渡动画 */
+.typing-indicator {
+  color: #72c6f7;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .dots {
+    animation: blink 1.5s infinite;
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
 .panel-fade-enter-active,
 .panel-fade-leave-active {
   transition: opacity 0.25s ease, transform 0.25s ease;

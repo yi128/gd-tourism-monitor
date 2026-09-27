@@ -1,0 +1,31 @@
+---
+description: Pinia 旅游数据 store 与静态 cityStats 的职责边界
+globs: src/stores/**/*.ts, src/data/**/*.ts
+alwaysApply: false
+---
+
+# Pinia 与旅游数据
+
+权威实现：`src/stores/tourism.ts`。静态源：`src/data/cityStats.ts`。
+
+## Store 只做什么
+
+- 只管理旅游数据状态：`selectedYear`，以及由 `cities` / `yearSnapshots` 派生的 computed。
+- 改年份只通过 `setYear`。城市历年趋势只用已有 `getCityTrend`。
+- 面板、页脚、地图标记应消费现有 getters（如 `scenicSpotRanking`、`footerStats`、`mapMarkers`），不要在组件里再拷一份排序逻辑，除非现有 getter 确实不够。
+
+## Store 不做什么
+
+- 不存放 AI 消息、会话列表、`isLoading`、SSE 缓冲。
+- 不要新增第二个 store 来管理聊天或 UI 面板开关。
+- 不要在 store 里发 HTTP 请求。
+
+## 数据源
+
+- 年份面板数据以 `yearSnapshots` 为准；城市坐标与历年 visitors/revenue 以 `cities` 为准。
+- 修改数据结构时同步更新 `CityEntity` / `YearSnapshot` 类型，并检查所有 `storeToRefs` 消费方（Header、Footer、左右栏图表、TimelineSlider、AI preprocessor）。
+
+## 消费约定
+
+组件侧：`useTourismStore()` + `storeToRefs`。AI 预处理从 store 取当前快照注入 Prompt，不要在 `src/ai` 里直接 import 并改写原始 `cities` 数组。
+---

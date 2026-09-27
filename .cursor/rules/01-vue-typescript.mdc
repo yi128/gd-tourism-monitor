@@ -1,0 +1,42 @@
+---
+description: Vue 3 Composition API、script setup 与 TypeScript 类型规范
+globs: src/**/*.vue, src/**/*.ts
+alwaysApply: false
+---
+
+# Vue 3 + TypeScript
+
+## 组件写法
+
+- 使用 Composition API 和 `<script setup lang="ts">`。不要用 Options API，不要用未带 `lang="ts"` 的 script。
+- 样式用现有 Sass `scoped` 模式，跟大屏蓝色主题一致；不要为了新 UI 引入 CSS 框架。
+- 新 UI 优先复用 `src/components/common/CPanel.vue`、`CEcharts.vue` 和 Element Plus 已在用的组件。
+
+## 类型
+
+- 禁止 `any`。需要宽松类型时用明确的联合类型、泛型或已有接口。
+- 复用现有类型，不要重复定义：
+  - 旅游数据：`src/data/cityStats.ts`（`CityEntity`、`YearSnapshot` 等）
+  - 对话：`src/components/AIInsight/composables/useAIChat.ts`（`ChatMessage`、`ChatSession`）
+  - API 消息：`src/services/aiService.ts`（`ChatMessage`、`StreamChunk`）
+- 从 Pinia 取响应式字段用 `storeToRefs`。
+- 环境变量只使用已有的 `import.meta.env.VITE_SILICONFLOW_API_KEY`。
+
+## 逻辑放置
+
+- 可复用逻辑放 composable，不要把复杂状态堆进单个 `.vue`。
+- 图表相关优先看 `src/composables/useChartConfig.ts`、`useChartHighlight.ts`。
+- AI 对话逻辑只扩展 `useAIChat`，不要在页面里直接 `fetch` 模型接口。
+
+## 示例（保持这种风格）
+
+```vue
+<script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useTourismStore } from '@/stores/tourism'
+
+const store = useTourismStore()
+const { selectedYear } = storeToRefs(store)
+</script>
+```
+---

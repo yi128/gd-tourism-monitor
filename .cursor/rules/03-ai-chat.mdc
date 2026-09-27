@@ -1,0 +1,36 @@
+---
+description: AI 数据助手流水线、useAIChat 会话与 SSE 流式输出约定
+globs: src/ai/**/*.ts, src/services/aiService.ts, src/components/AIInsight/**/*.vue, src/components/AIInsight/**/*.ts
+alwaysApply: false
+---
+
+# AI 对话与 SSE
+
+现有流水线必须保持：
+
+用户输入 → `classifyQuestion` → `preprocessor` → `buildPrompt` → `streamChat` → 增量写入当前会话消息。
+
+## 文件职责
+
+| 路径 | 职责 |
+|---|---|
+| `src/ai/questionClassifier.ts` | 本地正则分类，不要改成再打一次模型 |
+| `src/ai/preprocessor.ts` | 从旅游 store 数据格式化成 Prompt 文本 |
+| `src/ai/prompt.ts` | system prompt 与回答规则 |
+| `src/services/aiService.ts` | SiliconFlow `fetch` + ReadableStream 解析 SSE |
+| `src/components/AIInsight/composables/useAIChat.ts` | 消息、多会话、localStorage、调度上述流水线 |
+| `src/components/AIInsight/*.vue` | 只展示与触发 composable API |
+
+## 硬性约束
+
+- 对话逻辑继续用 `useAIChat`。不要在 `index.vue` 或其他组件里复制一套 `sendMessage`。
+- **不要重写 SSE**：保持 `stream: true`、`getReader()`、按行解析 `data: ` JSON、回调 `onChunk`。不要换成 `EventSource`、axios、或新的 AI SDK。
+- 会话持久化继续用 `localStorage` 键 `gd-tourism-ai-sessions`。不要改到 Pinia 或后端。
+- 发给模型的上下文格式保持：system + 最近若干条非流式消息 + 当前 user。调整条数前先说明。
+- UI（`AIChatHistory`、`SessionList`、`AIInputBar`、`PresetTags`）只使用 composable 已暴露的字段和方法；缺能力时先扩 `useAIChat` 的 return，再改 UI。
+
+## 类型
+
+- UI 消息用 `useAIChat` 的 `ChatMessage` / `ChatSession`。
+- 请求体用 `aiService` 的 `ChatMessage`（role 含 `system`）。不要把两种类型混成 `any`。
+---

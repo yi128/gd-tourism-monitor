@@ -32,27 +32,27 @@ const onSelect = (tag: string) => {
 <style lang="scss" scoped>
 .preset-tags {
   color: rgba(255, 255, 255, 0.55);
-  font-size: 19px;
+  font-size: 21px;
   line-height: 1.8;
 }
 
 .preset-hint {
-  margin: 0 0 12px 0;
+  margin: 0 0 14px 0;
 }
 
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .tag-item {
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: rgba(114, 198, 247, 0.15);
   border: 1px solid rgba(114, 198, 247, 0.3);
-  border-radius: 14px;
+  border-radius: 16px;
   color: #72c6f7;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   transition: all 0.2s;
 

@@ -1,0 +1,31 @@
+---
+description: 大屏布局、左右面板与 ECharts 图表复用约定
+globs: src/page/**/*.vue, src/components/**/*.vue, src/composables/**/*.ts, src/modules/**/*.ts
+alwaysApply: false
+---
+
+# 大屏 UI 与 ECharts
+
+唯一页面：`src/page/index.vue`（顶栏、左栏、地图+时间轴、右栏、底栏、AI 悬浮层）。大屏缩放由 `autofit.js` 按 1920×1080 处理，不要改成另一套自适应方案。
+
+## 布局组件
+
+- 顶栏 `CHeader.vue`、地图 `CMap.vue`、时间轴 `TimelineSlider.vue`、底栏 `CFooter.vue`。
+- 左栏容器 `leftPanel.vue`，右栏容器 `rightPanel.vue`。新图表先挂进这两个容器，不要在 `index.vue` 再铺一层面板。
+- 已存在但未挂载的图（如 `leftPanel/ageDistribution.vue`、`rightPanel/industryRevenue.vue`、`top5Tourists.vue`）优先复用，不要复制一份。
+
+## 图表
+
+- 渲染走 `src/components/common/CEcharts.vue`，不要在业务组件里直接 `echarts.init`（除非现有文件已经这样做且你只做最小修复）。
+- 配置与高亮优先复用 `src/composables/useChartConfig.ts`、`useChartHighlight.ts`。
+- 广东地图 option 放在 `src/modules/echartMap.ts`，地理数据在 `src/assets/data/guangdong-geo.ts`。
+- 图表数据从 `useTourismStore` 的对应 getter 来，不要在组件内硬编码一套与 store 重复的排名数据。
+
+## AI 面板
+
+- AI 悬浮层是 `src/components/AIInsight/index.vue`，覆盖在右侧区域之上。改布局时不要拆掉「可折叠按钮 + 面板」结构，也不要把聊天状态提升到 Pinia。
+
+## 样式
+
+- 使用组件内 Sass scoped。颜色、字号、折叠动画对齐现有左右栏与 AI 面板，不要引入 Tailwind 或其他 UI 库。
+---

@@ -323,6 +323,7 @@ export const use3DChartConfig = () => {
             },
             {
                 type: 'bar',
+                silent: true,
                 label: {
                     show: true,
                     position: 'top',

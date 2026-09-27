@@ -46,7 +46,7 @@ defineExpose({ scrollToBottom })
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   padding-right: 4px;
 
   &::-webkit-scrollbar {
@@ -60,29 +60,29 @@ defineExpose({ scrollToBottom })
 
 .chat-message {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
 
   .message-avatar {
     flex-shrink: 0;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(114, 198, 247, 0.25);
     color: #72c6f7;
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .message-content {
     max-width: 80%;
-    padding: 10px 14px;
-    border-radius: 12px;
+    padding: 12px 16px;
+    border-radius: 14px;
     color: #e8f4ff;
-    font-size: 18px;
-    line-height: 1.6;
+    font-size: 20px;
+    line-height: 1.7;
     word-break: break-word;
   }
 

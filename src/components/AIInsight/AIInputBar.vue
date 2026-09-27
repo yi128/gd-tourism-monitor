@@ -52,9 +52,9 @@ const onSend = () => {
   :deep(.el-textarea__inner) {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(114, 198, 247, 0.3);
-    border-radius: 10px;
+    border-radius: 12px;
     color: #fff;
-    padding: 10px 14px;
+    padding: 12px 16px;
     font-size: 18px;
     line-height: 1.5;
     resize: none;
@@ -73,9 +73,9 @@ const onSend = () => {
 
 .send-btn {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   border: none;
   background: linear-gradient(135deg, #3fa7ed 0%, #72c6f7 100%);
   color: #fff;
@@ -96,7 +96,7 @@ const onSend = () => {
   }
 
   .el-icon {
-    font-size: 22px;
+    font-size: 26px;
   }
 }
 </style>

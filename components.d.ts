@@ -27,6 +27,7 @@ declare module 'vue' {
     RealTimeHotWords: typeof import('./src/components/rightPanel/realTimeHotWords.vue')['default']
     ReceptionOfTourists: typeof import('./src/components/leftPanel/receptionOfTourists.vue')['default']
     RightPanel: typeof import('./src/components/rightPanel.vue')['default']
+    SessionList: typeof import('./src/components/AIInsight/SessionList.vue')['default']
     TimelineSlider: typeof import('./src/components/TimelineSlider.vue')['default']
     Top5Tourists: typeof import('./src/components/rightPanel/top5Tourists.vue')['default']
     TourismSpendTop5: typeof import('./src/components/rightPanel/tourismSpendTop5.vue')['default']

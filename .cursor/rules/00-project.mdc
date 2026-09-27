@@ -1,0 +1,35 @@
+---
+description: 广东省旅游大屏项目的全局工作流、目录约束与改代码纪律
+alwaysApply: true
+---
+
+# 项目全局约定
+
+本仓库是 **Vue 3 + TypeScript + Vite + Pinia + ECharts** 的单页旅游数据大屏。入口是 `src/main.ts`，根组件是 `src/page/index.vue`。没有 Vue Router，没有 axios，图表数据来自本地 `src/data/cityStats.ts`。
+
+## 改代码前
+
+1. 先分析调用链：谁读取、谁写入、store / composable / 组件如何串起来。
+2. 先用简短文字说明方案（改哪些文件、为什么、不改什么），再动手。
+3. 优先复用已有组件、`useTourismStore`、composables 和 AI 流水线，不要平行再写一套。
+4. 尽量减少修改文件数量；能在现有文件完成的不要新建文件。
+
+## 目录与依赖
+
+- 保持现有目录：`src/page`、`src/stores`、`src/data`、`src/ai`、`src/services`、`src/composables`、`src/components`、`src/modules`。
+- 不要为了新功能随意新增顶层目录或第二个 Pinia store。
+- 不要随意引入新依赖。尤其不要加 Vue Router、axios、新的 AI SDK。需要新依赖时先说明理由并等用户确认。
+- 路径别名：`@` → `src`，`@stores` → `src/stores`。
+
+## 职责边界
+
+- Pinia（`src/stores/tourism.ts`）只负责旅游数据与年份。
+- AI 对话状态、会话列表、SSE 属于 `useAIChat` + `localStorage`，不要塞进 Pinia。
+- 唯一 HTTP 出口是 `src/services/aiService.ts` 的 SiliconFlow 流式请求；不要另起请求层。
+
+## 改完后
+
+- 检查 TypeScript 类型错误（优先 `pnpm exec vue-tsc -b --pretty false`，或项目 `build` 中的类型检查）。
+- 不要主动 git commit / push，除非用户明确要求。
+- 不要改 `auto-imports.d.ts`、`components.d.ts` 等生成文件（除非工具自动更新）。
+---

@@ -23,7 +23,7 @@ import { ref, nextTick } from 'vue'
 import { User, Cpu } from '@element-plus/icons-vue'
 import type { ChatMessage } from './composables/useAIChat'
 
-const props = defineProps<{
+defineProps<{
   messages: ChatMessage[]
 }>()
 

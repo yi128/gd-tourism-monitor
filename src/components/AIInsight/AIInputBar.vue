@@ -5,31 +5,35 @@
       :model-value="modelValue"
       type="textarea"
       :autosize="{ minRows: 1, maxRows: 4 }"
-      placeholder="向AI数据助手提问..."
+      :placeholder="isLoading ? 'AI 正在生成回答，可直接输入新问题...' : '向AI数据助手提问...'"
       resize="none"
       @update:model-value="onInput"
       @keydown.enter.prevent="onSend"
     />
     <button
       class="send-btn"
-      :disabled="!modelValue.trim()"
+      :class="{ cancel: isLoading }"
+      :disabled="!isLoading && !modelValue.trim()"
       @click="onSend"
     >
-      <el-icon><Promotion /></el-icon>
+      <el-icon v-if="isLoading"><VideoPause /></el-icon>
+      <el-icon v-else><Promotion /></el-icon>
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Promotion } from '@element-plus/icons-vue'
+import { Promotion, VideoPause } from '@element-plus/icons-vue'
 
 const props = defineProps<{
   modelValue: string
+  isLoading?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'send', value: string): void
+  (e: 'cancel'): void
 }>()
 
 const onInput = (val: string) => {
@@ -37,9 +41,14 @@ const onInput = (val: string) => {
 }
 
 const onSend = () => {
+  if (props.isLoading) {
+    emit('cancel')
+    return
+  }
   const text = props.modelValue.trim()
   if (!text) return
   emit('send', text)
+  emit('update:modelValue', '')
 }
 </script>
 
@@ -93,6 +102,14 @@ const onSend = () => {
   &:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+
+  &.cancel {
+    background: linear-gradient(135deg, #ff6a6a 0%, #ff4757 100%);
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(255, 71, 87, 0.5);
+    }
   }
 
   .el-icon {

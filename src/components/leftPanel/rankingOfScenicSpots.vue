@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { vue3ScrollSeamless } from 'vue3-scroll-seamless'
 import CPanel from '@/components/common/CPanel.vue'
-import { computed, useId } from 'vue'
+import { computed } from 'vue'
 import { useTourismStore } from '@/stores/tourism'
 import { storeToRefs } from 'pinia'
 

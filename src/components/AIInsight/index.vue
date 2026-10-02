@@ -45,11 +45,12 @@
         </div>
 
         <div class="ai-panel-footer">
-          <div v-if="isLoading" class="typing-indicator">
-            <span>AI 正在思考</span>
-            <span class="dots">...</span>
-          </div>
-          <AIInputBar v-model="inputText" @send="handleSend" />
+          <AIInputBar
+            v-model="inputText"
+            :is-loading="isLoading"
+            @send="handleSend"
+            @cancel="handleCancel"
+          />
         </div>
       </div>
     </transition>
@@ -80,7 +81,8 @@ const {
     createSession,
     switchSession,
     deleteSession,
-     sendMessage,
+    sendMessage,
+    cancelRequest,
 } = useAIChat()
 
 const presetTags = [
@@ -114,8 +116,12 @@ const onPresetSelect = (tag: string) => {
 }
 
 const handleSend = async (text: string) => {
-    if (!text.trim() || isLoading.value) return
+    if (!text.trim()) return
     await sendMessage(text)
+}
+
+const handleCancel = () => {
+    cancelRequest()
 }
 
 const onNewSession = () => {

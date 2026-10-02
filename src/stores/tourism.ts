@@ -1,9 +1,10 @@
 // src/stores/tourism.ts
 export const TEST_TOURISM = 'tourism-file-loaded'
+export { cities } from '@/data/cityStats'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { cities, yearSnapshots } from '@/data/cityStats'
-import type { CityEntity, YearSnapshot } from '@/data/cityStats'
+import type { YearSnapshot } from '@/data/cityStats'
 
 export const useTourismStore = defineStore('tourism', () => {
     // ========== State ==========

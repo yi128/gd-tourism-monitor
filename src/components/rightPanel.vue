@@ -50,7 +50,7 @@ const toggleCollapse = () => {
   cursor: pointer;
   color: black;
   z-index: 100;
-  transition: right 0.3s ease;
+  transition: right 0.5s ease;
   
   &:hover {
     background: rgba(255, 255, 255, 0.3);
